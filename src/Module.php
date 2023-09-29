@@ -64,15 +64,15 @@ class Module
         $configListener->setMergedConfig($processedConfig->getMergedConfig());
     }
 
-  /**
-   * @return array<string, mixed>
-   */
+    /**
+     * @return array<string, mixed>
+     */
     public function getConfig(): array
     {
         return [
-        'config_parameters' => [
-        'providers' => [],
-        ]
+            'config_parameters' => [
+                'providers' => [],
+            ]
         ];
     }
 }

@@ -22,13 +22,13 @@ class ParameterStore implements ParameterProviderInterface
     public function __invoke(string $id): array
     {
         try {
-          /**
-           * @throws AwsException
-           */
+            /**
+             * @throws AwsException
+             */
             $results = $this->ssmClient->getPaginator('GetParametersByPath', [
-            'Path' => $id,
-            'Recursive' => true,
-            'WithDecryption' => true,
+                'Path' => $id,
+                'Recursive' => true,
+                'WithDecryption' => true,
             ]);
         } catch (AwsException $e) {
             throw new ParameterProviderException($e->getMessage(), $e->getCode(), $e);
@@ -38,7 +38,7 @@ class ParameterStore implements ParameterProviderInterface
 
         foreach ($results as $result) {
             foreach ($result['Parameters'] as $parameter) {
-                $parameters[$this->normaliseName($id, $parameter['Name'])] = (string) $parameter['Value'];
+                $parameters[$this->normaliseName($id, $parameter['Name'])] = (string)$parameter['Value'];
             }
         }
 
@@ -50,15 +50,15 @@ class ParameterStore implements ParameterProviderInterface
         return ltrim(substr($name, strlen($path)), '/');
     }
 
-  /**
-   * @param array<string, mixed> $config
-   */
+    /**
+     * @param array<string, mixed> $config
+     */
     public static function create(array $config): self
     {
         $clientConfig = ($config['aws']['ssm_client'] ?? []) + ($config['aws']['global'] ?? []) + [
-        'version' => 'latest',
-        'region' => 'eu-west-1',
-        ];
+                'version' => 'latest',
+                'region' => 'eu-west-1',
+            ];
 
         $ssmClient = new SsmClient($clientConfig);
 

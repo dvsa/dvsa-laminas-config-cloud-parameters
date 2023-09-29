@@ -26,12 +26,12 @@ class ParameterStoreTest extends TestCase
     {
         $parameterStoreClient = $this->createMock(SsmClient::class);
         $parameterStoreClient->method('getPaginator')->willReturn([[
-        'Parameters' => [
-        [
-          'Name' => '/EXAMPLE/PARAMETER/ID',
-          'Value' => 'EXAMPLE_VALUE',
-        ],
-        ],
+            'Parameters' => [
+                [
+                    'Name' => '/EXAMPLE/PARAMETER/ID',
+                    'Value' => 'EXAMPLE_VALUE',
+                ],
+            ],
         ]]);
 
         $parameterStore = new ParameterStore($parameterStoreClient);

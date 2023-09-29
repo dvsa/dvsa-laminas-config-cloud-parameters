@@ -23,7 +23,7 @@ class SecretsManager implements ParameterProviderInterface
     {
         try {
             $result = $this->secretsManagerClient->getSecretValue([
-            'SecretId' => $id,
+                'SecretId' => $id,
             ]);
         } catch (AwsException $e) {
             throw new ParameterProviderException($e->getMessage(), $e->getCode(), $e);
@@ -41,9 +41,9 @@ class SecretsManager implements ParameterProviderInterface
     public static function create(array $config): self
     {
         $clientConfig = ($config['aws']['secrets_manager'] ?? []) + ($config['aws']['global'] ?? []) + [
-        'version' => 'latest',
-        'region' => 'eu-west-1',
-        ];
+                'version' => 'latest',
+                'region' => 'eu-west-1',
+            ];
 
         $secretsManagerClient = new SecretsManagerClient($clientConfig);
 

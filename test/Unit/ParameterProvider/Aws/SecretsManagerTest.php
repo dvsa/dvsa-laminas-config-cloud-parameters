@@ -26,7 +26,7 @@ class SecretsManagerTest extends TestCase
     {
         $secretsManagerClient = $this->getMockBuilder(SecretsManagerClient::class)->disableOriginalConstructor()->addMethods(['getSecretValue'])->getMock();
         $secretsManagerClient->method('getSecretValue')->willReturn([
-        'SecretString' => '{"foo":"bar"}',
+            'SecretString' => '{"foo":"bar"}',
         ]);
 
         $secretsManager = new SecretsManager($secretsManagerClient);
@@ -37,7 +37,7 @@ class SecretsManagerTest extends TestCase
     {
         $secretsManagerClient = $this->getMockBuilder(SecretsManagerClient::class)->disableOriginalConstructor()->addMethods(['getSecretValue'])->getMock();
         $secretsManagerClient->method('getSecretValue')->willReturn([
-        'SecretBinary' => base64_encode('{"foo":"bar"}'),
+            'SecretBinary' => base64_encode('{"foo":"bar"}'),
         ]);
 
         $secretsManager = new SecretsManager($secretsManagerClient);

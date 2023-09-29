@@ -21,39 +21,39 @@ class ModuleTest extends TestCase
         $mock = new MockHandler();
 
         $mock->append(new Result([
-        'SecretString' => json_encode(['SECRET_VALUE_1' => 'secret'])
+            'SecretString' => json_encode(['SECRET_VALUE_1' => 'secret'])
         ]));
 
         $mock->append(
             new Result([
-            'Parameters' => [
-            [
-            'Name' => '/EXAMPLE/PATH/PARAMETER_VALUE_1',
-            'Value' => 'parameter',
-            ]
-            ]
+                'Parameters' => [
+                    [
+                        'Name' => '/EXAMPLE/PATH/PARAMETER_VALUE_1',
+                        'Value' => 'parameter',
+                    ]
+                ]
             ])
         );
 
         $config = [
-        'aws' => [
-        'global' => [
-          'handler' => $mock,
-          'credentials' => false,
-        ],
-        ],
-        'config_parameters' => [
-        'providers' => [
-          SecretsManager::class => [
-            'SECRET_KEY_1',
-          ],
-          ParameterStore::class => [
-            '/EXAMPLE/PATH',
-          ],
-        ],
-        ],
-        'secret' => '%SECRET_VALUE_1%',
-        'parameter' => '%PARAMETER_VALUE_1%',
+            'aws' => [
+                'global' => [
+                    'handler' => $mock,
+                    'credentials' => false,
+                ],
+            ],
+            'config_parameters' => [
+                'providers' => [
+                    SecretsManager::class => [
+                        'SECRET_KEY_1',
+                    ],
+                    ParameterStore::class => [
+                        '/EXAMPLE/PATH',
+                    ],
+                ],
+            ],
+            'secret' => '%SECRET_VALUE_1%',
+            'parameter' => '%PARAMETER_VALUE_1%',
         ];
 
         $application = $this->createApplication($config);
@@ -71,24 +71,24 @@ class ModuleTest extends TestCase
         $mock = new MockHandler();
 
         $mock->append(new Result([
-        'SecretString' => json_encode(['SECRET_VALUE_1' => 'secret'])
+            'SecretString' => json_encode(['SECRET_VALUE_1' => 'secret'])
         ]));
 
         $config = [
-        'aws' => [
-        'global' => [
-          'handler' => $mock,
-          'credentials' => false,
-        ],
-        ],
-        'config_parameters' => [
-        'providers' => [
-          SecretsManager::class => [
-            'SECRET_KEY_1',
-          ],
-        ],
-        ],
-        'parameter' => '%PARAMETER_VALUE_1%',
+            'aws' => [
+                'global' => [
+                    'handler' => $mock,
+                    'credentials' => false,
+                ],
+            ],
+            'config_parameters' => [
+                'providers' => [
+                    SecretsManager::class => [
+                        'SECRET_KEY_1',
+                    ],
+                ],
+            ],
+            'parameter' => '%PARAMETER_VALUE_1%',
         ];
 
         $application = $this->createApplication($config);
@@ -99,10 +99,10 @@ class ModuleTest extends TestCase
     protected function createApplication(array $moduleConfig): Application
     {
         $configuration = [
-        'modules' => [
-        'Dvsa\LaminasConfigCloudParameters',
-        ],
-        'module_listener_options' => [],
+            'modules' => [
+                'Dvsa\LaminasConfigCloudParameters',
+            ],
+            'module_listener_options' => [],
         ];
 
         $smConfig = new ServiceManagerConfig([]);
@@ -110,9 +110,9 @@ class ModuleTest extends TestCase
         $smConfig->configureServiceManager($serviceManager);
         $serviceManager->setService('ApplicationConfig', $configuration);
 
-      /**
-       * @var ModuleManager $moduleManager
-       */
+        /**
+         * @var ModuleManager $moduleManager
+         */
         $moduleManager = $serviceManager->get('ModuleManager');
 
         $moduleManager->getEventManager()->attach(
