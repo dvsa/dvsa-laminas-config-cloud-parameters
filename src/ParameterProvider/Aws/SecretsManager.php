@@ -19,6 +19,9 @@ class SecretsManager implements ParameterProviderInterface
         $this->secretsManagerClient = $secretsManagerClient;
     }
 
+    /**
+     * @throws \JsonException
+     */
     public function __invoke(string $id): array
     {
         try {
@@ -35,7 +38,7 @@ class SecretsManager implements ParameterProviderInterface
             $secret = base64_decode($result['SecretBinary']);
         }
 
-        return json_decode($secret, true);
+        return json_decode($secret, true, 512, \JSON_THROW_ON_ERROR);
     }
 
     public static function create(array $config): self

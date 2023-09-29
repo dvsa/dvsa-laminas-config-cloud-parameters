@@ -38,6 +38,16 @@
     "bin": "echo 'bin not installed'",
     "post-install-cmd": [
       "@composer bin all install"
+    ],
+    "test": "phpunit",
+    "phpcs": "phpcs",
+    "psalm": "psalm",
+    "phpstan": "phpstan",
+    "all": [
+      "@test",
+      "@phpcs",
+      "@psalm",
+      "@phpstan"
     ]
   },
   "extra": {
