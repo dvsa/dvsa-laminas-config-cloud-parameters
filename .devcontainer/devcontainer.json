@@ -1,0 +1,13 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
+  "features": {
+    "ghcr.io/devcontainers/features/php:1": {
+      "version": "8.0"
+    }
+  },
+  "containerEnv": {
+    "AWS_ACCESS_KEY_ID": "test",
+    "AWS_SECRET_ACCESS_KEY": "test",
+    "AWS_DEFAULT_REGION": "eu-west-1"
+  }
+}
