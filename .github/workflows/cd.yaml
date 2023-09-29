@@ -21,4 +21,4 @@ jobs:
         id: release
         with:
           release-type: node
-          package-name: laminas-config-aggregator-cloud-parameters
+          package-name: laminas-config-cloud-parameters
