@@ -1,24 +1,25 @@
-# Laminas config aggregator cloud parameters
+# Laminas config cloud parameters
+
+This Composer library facilitates the use of Laminas config placeholders, enabling the substitution of values with those supplied by cloud services dedicated to variable storage using Symfony ParameterBag.
 
 ## How to use
 
 ### In a Laminas MVC application
-1. Configure the Cloud providers in your configuration
-    For example, to use AWS Secrets Manager and AWS Parameter Store, configuration would look like this:
+1. Configure the Cloud providers in your configuration:
     
     ```php
     <?php
         'config' => [
             'providers' => [
                 FQCN::class => [
-                    // Ids to retreive from the parameter provider.
+                    // Ids to retreive from the cloud variable storage service.
                 ],
                 
                 // ...
             ],
         ],
     ```
-1. Add this library to your Laminas module list:
+1. Register the module with the Laminas ModuleManager:
 
     ```php
     <?php
@@ -30,10 +31,18 @@
     ];
     ```
 
+1. Placeholders can be then added to the Laminas config:
+
+    ```php
+    return [
+        'foo' => '%bar%', // Will be replaced by a parameter with the key 'bar' from the cloud variable storage service.
+    ];
+    ```
+
 ## Available cloud parameter providers
 
 ### AWS
-### Secrets Manager
+#### Secrets Manager
 
 Only secrets that are stored in key/value pairs are supported.
 
@@ -56,7 +65,7 @@ return [
 ];
 ```
 
-### Parameter Store
+#### Parameter Store
 
 Parameters will be loaded recursively by path. The key will be parameter name without the path provided as the key.
 
