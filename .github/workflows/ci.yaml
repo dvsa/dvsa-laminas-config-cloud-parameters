@@ -7,6 +7,8 @@ on:
 
 jobs:
   security:
+    env:
+      COMPOSER_IGNORE_PLATFORM_REQS: 1
     uses: dvsa/.github/.github/workflows/php-library-security.yml@main
     with: 
       php-versions: "[\"8.3\"]"
@@ -14,11 +16,15 @@ jobs:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
   static-analysis:
+    env:
+      COMPOSER_IGNORE_PLATFORM_REQS: 1
     uses: dvsa/.github/.github/workflows/php-library-static.yml@main
     with:
       php-version: '8.3'
 
   tests:
+    env:
+      COMPOSER_IGNORE_PLATFORM_REQS: 1
     uses: dvsa/.github/.github/workflows/php-library-tests.yml@main
     with:
       php-versions: "[\"8.3\"]"
