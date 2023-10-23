@@ -60,8 +60,8 @@ class ModuleTest extends TestCase
 
         $config = $application->getConfig();
 
-        $this->assertEquals('secret', $config['secret']);
-        $this->assertEquals('parameter', $config['parameter']);
+        $this->assertEquals('secret', $config['secret'] ?? null);
+        $this->assertEquals('parameter', $config['parameter'] ?? null);
     }
 
     public function testMissingParametersThrowException(): void
@@ -96,6 +96,9 @@ class ModuleTest extends TestCase
         $application->getConfig();
     }
 
+    /**
+     * @param array<string, mixed> $moduleConfig
+     */
     protected function createApplication(array $moduleConfig): Application
     {
         $configuration = [
