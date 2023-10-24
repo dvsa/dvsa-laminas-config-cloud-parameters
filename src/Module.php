@@ -65,7 +65,7 @@ class Module
     }
 
     /**
-     * @return array[][]
+     * @return array<string, mixed>
      *
      * @psalm-return array{config_parameters: array{providers: array<string, string[]>}}
      */
