@@ -9,6 +9,9 @@ use Dvsa\LaminasConfigCloudParameters\Exception\ParameterProviderException;
 use Dvsa\LaminasConfigCloudParameters\ParameterProvider\Aws\SecretsManager;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @psalm-api
+ */
 class SecretsManagerTest extends TestCase
 {
     public function testThrowsLibraryException(): void

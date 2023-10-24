@@ -9,6 +9,9 @@ use Dvsa\LaminasConfigCloudParameters\Exception\ParameterProviderException;
 use Dvsa\LaminasConfigCloudParameters\ParameterProvider\Aws\ParameterStore;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @psalm-api
+ */
 class ParameterStoreTest extends TestCase
 {
     public function testThrowsLibraryException(): void

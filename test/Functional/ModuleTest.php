@@ -14,6 +14,9 @@ use Laminas\Mvc\Service\ServiceManagerConfig;
 use Laminas\ServiceManager\ServiceManager;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @psalm-api
+ */
 class ModuleTest extends TestCase
 {
     public function testProcessParameters(): void
@@ -60,8 +63,8 @@ class ModuleTest extends TestCase
 
         $config = $application->getConfig();
 
-        $this->assertEquals('secret', $config['secret']);
-        $this->assertEquals('parameter', $config['parameter']);
+        $this->assertEquals('secret', $config['secret'] ?? null);
+        $this->assertEquals('parameter', $config['parameter'] ?? null);
     }
 
     public function testMissingParametersThrowException(): void
@@ -96,6 +99,9 @@ class ModuleTest extends TestCase
         $application->getConfig();
     }
 
+    /**
+     * @param array<string, mixed> $moduleConfig
+     */
     protected function createApplication(array $moduleConfig): Application
     {
         $configuration = [
