@@ -14,6 +14,9 @@ use Laminas\Mvc\Service\ServiceManagerConfig;
 use Laminas\ServiceManager\ServiceManager;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @psalm-api
+ */
 class ModuleTest extends TestCase
 {
     public function testProcessParameters(): void

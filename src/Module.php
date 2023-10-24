@@ -42,7 +42,7 @@ class Module
 
             $provider = $fqcn::create($config);
 
-            $parameters = array_merge($parameters, ...array_map(fn($id) => $provider($id), $ids));
+            $parameters = array_merge($parameters, ...array_map(fn(string $id) => $provider($id), $ids));
         }
 
         $bag = new ParameterBag($parameters);
@@ -65,7 +65,9 @@ class Module
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array[][]
+     *
+     * @psalm-return array{config_parameters: array{providers: array<string, string[]>}}
      */
     public function getConfig(): array
     {
