@@ -9,15 +9,29 @@ This Composer library facilitates the use of Laminas config placeholders, enabli
     
     ```php
     <?php
+
+    use Dvsa\LaminasConfigCloudParameters\Provider\SecretsManager;
+    use Dvsa\LaminasConfigCloudParameters\Cast\Boolean;
+
+    return [
         'config' => [
             'providers' => [
-                FQCN::class => [
-                    // Ids to retreive from the cloud variable storage service.
+                SecretsManager::class => [
+                    'example-secret',
+                    // ...
                 ],
                 
                 // ...
             ],
+
+            'casts' => [
+                'parameter_1' => Boolean::class,
+
+                // ...
+            ],
         ],
+        // ...
+    ];
     ```
 1. Register the module with the Laminas ModuleManager:
 
@@ -26,8 +40,8 @@ This Composer library facilitates the use of Laminas config placeholders, enabli
     // module.config.php
     
     return [
-        'Laminas\Router',
         'Dvsa\LaminasConfigCloudParameters',
+        // ...
     ];
     ```
 
@@ -73,6 +87,8 @@ Parameters will be loaded recursively by path. The key will be parameter name wi
 
 ```php 
 <?php
+
+use Dvsa\LaminasConfigCloudParameters\Provider\ParameterStore;
 
 return [
     'config' => [

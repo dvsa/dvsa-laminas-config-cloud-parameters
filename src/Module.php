@@ -53,6 +53,10 @@ class Module
 
                 $resolved = $bag->resolveValue($config);
 
+                if (!empty($config['config_parameters']['casts'])) {
+                    $this->applyCasts($resolved, $config['config_parameters']['casts']);
+                }
+
                 return $bag->unescapeValue($resolved);
             } catch (SymfonyParameterNotFoundException $e) {
                 throw new Exception\ParameterNotFoundException($e->getMessage(), $e->getCode(), $e);
@@ -74,7 +78,25 @@ class Module
         return [
             'config_parameters' => [
                 'providers' => [],
-            ]
+                'casts' => [], 
+            ],
         ];
+    }
+
+    private function applyCasts(array &$config, array $casts): void
+    {
+        foreach ($casts as $key => $type) {
+            if (!array_key_exists($key, $config)) {
+                continue;
+            }
+
+            if (is_array($config[$key])) {
+                $this->applyCasts($config[$key], $casts);
+            }
+            
+            if (is_a($type, Cast\CastInterface::class, true)) {
+                $config[$key] = (new $type)($config[$key]);
+            }
+        }
     }
 }
