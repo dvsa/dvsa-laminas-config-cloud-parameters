@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Dvsa\LaminasConfigCloudParameters\Cast;
 

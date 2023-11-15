@@ -71,18 +71,22 @@ class Module
     /**
      * @return array<string, mixed>
      *
-     * @psalm-return array{config_parameters: array{providers: array<string, string[]>}}
+     * @psalm-return array{config_parameters: array{providers: array<string, string[]>, casts: array<string, class-string<Cast\CastInterface>>}}
      */
     public function getConfig(): array
     {
         return [
             'config_parameters' => [
                 'providers' => [],
-                'casts' => [], 
+                'casts' => [],
             ],
         ];
     }
 
+    /**
+     * @psalm-param array<string, mixed> $config
+     * @psalm-param array<string, class-string<Cast\CastInterface>> $casts
+     */
     private function applyCasts(array &$config, array $casts): void
     {
         foreach ($casts as $key => $type) {
@@ -93,9 +97,9 @@ class Module
             if (is_array($config[$key])) {
                 $this->applyCasts($config[$key], $casts);
             }
-            
+
             if (is_a($type, Cast\CastInterface::class, true)) {
-                $config[$key] = (new $type)($config[$key]);
+                $config[$key] = (new $type())($config[$key]);
             }
         }
     }
