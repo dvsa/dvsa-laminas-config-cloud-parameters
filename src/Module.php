@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dvsa\LaminasConfigCloudParameters;
 
+use Dvsa\LaminasConfigCloudParameters\Exception\InvalidCastException;
 use Dvsa\LaminasConfigCloudParameters\ParameterProvider\ParameterProviderInterface;
 use Laminas\ConfigAggregator\ArrayProvider;
 use Laminas\ConfigAggregator\ConfigAggregator;
@@ -12,6 +13,7 @@ use Laminas\ModuleManager\ModuleEvent;
 use Laminas\ModuleManager\ModuleManager;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException as SymfonyParameterNotFoundException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
 /**
  * @psalm-api
@@ -89,17 +91,25 @@ class Module
      */
     private function applyCasts(array &$config, array $casts): void
     {
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+
         foreach ($casts as $key => $type) {
-            if (!array_key_exists($key, $config)) {
+            if (!is_a($type, Cast\CastInterface::class, true)) {
+                throw new InvalidCastException("Class {$type} must implement " . Cast\CastInterface::class . " interface.");
+            }
+
+            $property = $key;
+
+            $exists = $propertyAccessor->isReadable($config, $property);
+
+            if (!$exists) {
                 continue;
             }
 
-            if (is_array($config[$key])) {
-                $this->applyCasts($config[$key], $casts);
-            }
+            $value = $propertyAccessor->getValue($config, $property);
 
-            if (is_a($type, Cast\CastInterface::class, true)) {
-                $config[$key] = (new $type())($config[$key]);
+            if (isset($value) && is_string($value)) {
+                $propertyAccessor->setValue($config, $property, (new $type())($value));
             }
         }
     }

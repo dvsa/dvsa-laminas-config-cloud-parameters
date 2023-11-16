@@ -12,6 +12,7 @@ This Composer library facilitates the use of Laminas config placeholders, enabli
 
     use Dvsa\LaminasConfigCloudParameters\Provider\SecretsManager;
     use Dvsa\LaminasConfigCloudParameters\Cast\Boolean;
+    use Dvsa\LaminasConfigCloudParameters\Cast\Integer;
 
     return [
         'config' => [
@@ -25,7 +26,9 @@ This Composer library facilitates the use of Laminas config placeholders, enabli
             ],
 
             'casts' => [
-                'parameter_1' => Boolean::class,
+                // Uses `symfony/property-access` to access the property. See https://symfony.com/doc/current/components/property_access.html#reading-from-arrays.
+                '[foo]' => Boolean::class,
+                '[bar][nested]' => Integer::class,
 
                 // ...
             ],
@@ -49,7 +52,10 @@ This Composer library facilitates the use of Laminas config placeholders, enabli
 
     ```php
     return [
-        'foo' => '%bar%', // Will be replaced by a parameter with the key 'bar' from the cloud variable storage service.
+        'foo' => '%bar%',
+        'bar' => [
+            'nested' => '%baz%',
+        ],
     ];
     ```
 
