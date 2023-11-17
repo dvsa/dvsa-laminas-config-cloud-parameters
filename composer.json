@@ -17,7 +17,8 @@
     "laminas/laminas-modulemanager": "^2.4|^3.0",
     "laminas/laminas-config": "^2.0|^3.0",
     "laminas/laminas-config-aggregator": "^1.7",
-    "symfony/dependency-injection": "^5.4"
+    "symfony/dependency-injection": "^5.4",
+    "symfony/property-access": "^5.4|^6.3"
   },
   "suggest": {
     "aws/aws-sdk-php": "To use the AWS parameter providers"

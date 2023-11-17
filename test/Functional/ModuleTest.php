@@ -4,6 +4,8 @@ namespace DvsaTest\LaminasConfigCloudParameters\Functional;
 
 use Aws\MockHandler;
 use Aws\Result;
+use Dvsa\LaminasConfigCloudParameters\Cast\Boolean;
+use Dvsa\LaminasConfigCloudParameters\Cast\Integer;
 use Dvsa\LaminasConfigCloudParameters\Exception\ParameterNotFoundException;
 use Dvsa\LaminasConfigCloudParameters\ParameterProvider\Aws\ParameterStore;
 use Dvsa\LaminasConfigCloudParameters\ParameterProvider\Aws\SecretsManager;
@@ -33,6 +35,14 @@ class ModuleTest extends TestCase
                     [
                         'Name' => '/EXAMPLE/PATH/PARAMETER_VALUE_1',
                         'Value' => 'parameter',
+                    ],
+                    [
+                        'Name' => '/EXAMPLE/PATH/PARAMETER_VALUE_2',
+                        'Value' => 'TRUE',
+                    ],
+                    [
+                        'Name' => '/EXAMPLE/PATH/PARAMETER_VALUE_3',
+                        'Value' => '42',
                     ]
                 ]
             ])
@@ -54,17 +64,29 @@ class ModuleTest extends TestCase
                         '/EXAMPLE/PATH',
                     ],
                 ],
+                'casts' => [
+                    '[parameter_2]' => Boolean::class,
+                    '[parameter_3][nested][deep]' => new Integer(),
+                ],
             ],
             'secret' => '%SECRET_VALUE_1%',
             'parameter' => '%PARAMETER_VALUE_1%',
+            'parameter_2' => '%PARAMETER_VALUE_2%',
+            'parameter_3' => [
+                'nested' => [
+                    'deep' => '%PARAMETER_VALUE_3%',
+                ],
+            ],
         ];
 
         $application = $this->createApplication($config);
 
         $config = $application->getConfig();
 
-        $this->assertEquals('secret', $config['secret'] ?? null);
-        $this->assertEquals('parameter', $config['parameter'] ?? null);
+        $this->assertSame('secret', $config['secret'] ?? null);
+        $this->assertSame('parameter', $config['parameter'] ?? null);
+        $this->assertSame(true, $config['parameter_2'] ?? null);
+        $this->assertSame(42, $config['parameter_3']['nested']['deep'] ?? null);
     }
 
     public function testMissingParametersThrowException(): void
