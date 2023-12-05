@@ -21,4 +21,4 @@ jobs:
         id: release
         with:
           release-type: node
-          package-name: laminas-config-cloud-parameters
+          target-branch: ${{ github.ref_name }}
