@@ -20,5 +20,5 @@ jobs:
       - uses: google-github-actions/release-please-action@v4
         id: release
         with:
-          release-type: node
+          release-type: php
           target-branch: ${{ github.ref_name }}
