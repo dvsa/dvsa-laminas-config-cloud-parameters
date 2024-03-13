@@ -20,6 +20,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  */
 class Module
 {
+
     public function init(ModuleManager $moduleManager): void
     {
         $events = $moduleManager->getEventManager();
@@ -108,7 +109,7 @@ class Module
 
             $value = $propertyAccessor->getValue($config, $property);
 
-            if (isset($value) && is_string($value)) {
+            if (is_string($value)) {
                 $propertyAccessor->setValue($config, $property, (new $type())($value));
             }
         }
