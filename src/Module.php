@@ -20,12 +20,11 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  */
 class Module
 {
-
     public function init(ModuleManager $moduleManager): void
     {
         $events = $moduleManager->getEventManager();
 
-        $events->attach(ModuleEvent::EVENT_MERGE_CONFIG, [$this, 'onMergeConfig']);
+        $events->attach(eventName: ModuleEvent::EVENT_MERGE_CONFIG, listener:[$this, 'onMergeConfig']);
     }
 
     public function onMergeConfig(ModuleEvent $e): void
@@ -36,12 +35,12 @@ class Module
             return;
         }
 
-        $config = $configListener->getMergedConfig(false);
+        $config = $configListener->getMergedConfig(returnConfigAsObject: false);
 
         $parameters = [];
 
         foreach ($config['config_parameters']['providers'] as $fqcn => $ids) {
-            assert(is_a($fqcn, ParameterProviderInterface::class, true));
+            assert(is_a($fqcn, ParameterProviderInterface::class, allow_string: true));
 
             $provider = $fqcn::create($config);
 
@@ -66,7 +65,7 @@ class Module
             }
         };
 
-        $processedConfig = new ConfigAggregator([new ArrayProvider($config)], null, [$postProcessor]);
+        $processedConfig = new ConfigAggregator([new ArrayProvider($config)], postProcessors: [$postProcessor]);
 
         $configListener->setMergedConfig($processedConfig->getMergedConfig());
     }
@@ -95,7 +94,7 @@ class Module
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
 
         foreach ($casts as $key => $type) {
-            if (!is_a($type, Cast\CastInterface::class, true)) {
+            if (!is_a($type, Cast\CastInterface::class, allow_string: true)) {
                 throw new InvalidCastException("Class {$type} must implement " . Cast\CastInterface::class . " interface.");
             }
 
