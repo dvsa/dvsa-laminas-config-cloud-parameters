@@ -94,7 +94,7 @@ class Module
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
 
         foreach ($casts as $key => $type) {
-            if (!is_a($type, Cast\CastInterface::class, true)) {
+            if (!is_a($type, Cast\CastInterface::class, allow_string: true)) {
                 throw new InvalidCastException("Class {$type} must implement " . Cast\CastInterface::class . " interface.");
             }
 
@@ -108,7 +108,7 @@ class Module
 
             $value = $propertyAccessor->getValue($config, $property);
 
-            if (isset($value) && is_string($value)) {
+            if (is_string($value)) {
                 $propertyAccessor->setValue($config, $property, (new $type())($value));
             }
         }
