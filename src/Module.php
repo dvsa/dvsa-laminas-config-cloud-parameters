@@ -24,7 +24,7 @@ class Module
     {
         $events = $moduleManager->getEventManager();
 
-        $events->attach(eventName: ModuleEvent::EVENT_MERGE_CONFIG, listener:[$this, 'onMergeConfig']);
+        $events->attach(ModuleEvent::EVENT_MERGE_CONFIG, [$this, 'onMergeConfig']);
     }
 
     public function onMergeConfig(ModuleEvent $e): void
@@ -35,12 +35,12 @@ class Module
             return;
         }
 
-        $config = $configListener->getMergedConfig(returnConfigAsObject: false);
+        $config = $configListener->getMergedConfig(false);
 
         $parameters = [];
 
         foreach ($config['config_parameters']['providers'] as $fqcn => $ids) {
-            assert(is_a($fqcn, ParameterProviderInterface::class, allow_string: true));
+            assert(is_a($fqcn, ParameterProviderInterface::class, true));
 
             $provider = $fqcn::create($config);
 
@@ -65,7 +65,7 @@ class Module
             }
         };
 
-        $processedConfig = new ConfigAggregator([new ArrayProvider($config)], postProcessors: [$postProcessor]);
+        $processedConfig = new ConfigAggregator([new ArrayProvider($config)], null,[$postProcessor]);
 
         $configListener->setMergedConfig($processedConfig->getMergedConfig());
     }
