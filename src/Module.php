@@ -65,7 +65,7 @@ class Module
             }
         };
 
-        $processedConfig = new ConfigAggregator([new ArrayProvider($config)], null,[$postProcessor]);
+        $processedConfig = new ConfigAggregator([new ArrayProvider($config)], null, [$postProcessor]);
 
         $configListener->setMergedConfig($processedConfig->getMergedConfig());
     }
