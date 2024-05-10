@@ -4,22 +4,22 @@ on:
   pull_request:
   schedule:
     - cron: '0 0 * * 1'
-
+#chlip2/olcs-backend/.github/workflows/php-security.yml@feature-bl-16691-update-actions-to-node-20
 jobs:
   security:
-    uses: dvsa/.github/.github/workflows/php-library-security.yml@main
+    uses: chlip2/dvsa-laminas-config-cloud-parameters/.github/workflows/php-library-security.yml@feature-bl-16691-update-actions-to-node-20
     with:
       php-versions: "[\"8.0\", \"8.1\", \"8.2\", \"8.3\"]"
     secrets:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
   static-analysis:
-    uses: dvsa/.github/.github/workflows/php-library-static.yml@main
+    uses: chlip2/dvsa-laminas-config-cloud-parameters/.github/workflows/php-library-static.yml@feature-bl-16691-update-actions-to-node-20
     with:
       php-version: '8.3'
 
   tests:
-    uses: dvsa/.github/.github/workflows/php-library-tests.yml@main
+    uses: chlip2/dvsa-laminas-config-cloud-parameters/.github/workflows/php-library-tests.yml@feature-bl-16691-update-actions-to-node-20
     with:
       php-versions: "[\"8.0\", \"8.1\", \"8.2\", \"8.3\"]"
       fail-fast: false
