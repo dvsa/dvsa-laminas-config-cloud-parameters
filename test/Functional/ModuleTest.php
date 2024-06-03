@@ -81,7 +81,12 @@ class ModuleTest extends TestCase
 
         $application = $this->createApplication($config);
 
+        /**
+         * @var array<string, mixed> $config
+         */
         $config = $application->getConfig();
+
+        $this->assertIsArray($config);
 
         $this->assertSame('secret', $config['secret'] ?? null);
         $this->assertSame('parameter', $config['parameter'] ?? null);
