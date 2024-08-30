@@ -49,10 +49,13 @@ class Module
 
         $bag = new ParameterBag($parameters);
 
-        $postProcessor = function (array $config) use ($bag) {
+        $postProcessor = function (array $config) use ($bag): mixed {
             try {
                 $bag->resolve();
 
+                /**
+                 * @var array<scalar, array<scalar, mixed>> $config
+                 */
                 $resolved = $bag->resolveValue($config);
 
                 if (!empty($config['config_parameters']['casts'])) {

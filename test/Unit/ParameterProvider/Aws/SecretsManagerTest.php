@@ -18,8 +18,8 @@ class SecretsManagerTest extends TestCase
     {
         $this->expectException(ParameterProviderException::class);
 
-        $secretsManagerClient = $this->getMockBuilder(SecretsManagerClient::class)->disableOriginalConstructor()->addMethods(['getSecretValue'])->getMock();
-        $secretsManagerClient->method('getSecretValue')->willThrowException(new AwsException('AWS_EXCEPTION', new Command('GetSecretValue')));
+        $secretsManagerClient = $this->createMock(SecretsManagerClient::class);
+        $secretsManagerClient->method('__call')->with('getSecretValue')->willThrowException(new AwsException('AWS_EXCEPTION', new Command('GetSecretValue')));
 
         $secretsManager = new SecretsManager($secretsManagerClient);
         $secretsManager('ID');
@@ -27,8 +27,8 @@ class SecretsManagerTest extends TestCase
 
     public function testStringSecretReturned(): void
     {
-        $secretsManagerClient = $this->getMockBuilder(SecretsManagerClient::class)->disableOriginalConstructor()->addMethods(['getSecretValue'])->getMock();
-        $secretsManagerClient->method('getSecretValue')->willReturn([
+        $secretsManagerClient = $this->createMock(SecretsManagerClient::class);
+        $secretsManagerClient->method('__call')->with('getSecretValue')->willReturn([
             'SecretString' => '{"foo":"bar"}',
         ]);
 
@@ -38,8 +38,8 @@ class SecretsManagerTest extends TestCase
 
     public function testBinaryStringSecretReturned(): void
     {
-        $secretsManagerClient = $this->getMockBuilder(SecretsManagerClient::class)->disableOriginalConstructor()->addMethods(['getSecretValue'])->getMock();
-        $secretsManagerClient->method('getSecretValue')->willReturn([
+        $secretsManagerClient = $this->createMock(SecretsManagerClient::class);
+        $secretsManagerClient->method('__call')->with('getSecretValue')->willReturn([
             'SecretBinary' => base64_encode('{"foo":"bar"}'),
         ]);
 
