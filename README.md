@@ -15,7 +15,7 @@ This Composer library facilitates the use of Laminas config placeholders, enabli
     use Dvsa\LaminasConfigCloudParameters\Cast\Integer;
 
     return [
-        'config' => [
+        'config_parameters' => [
             'providers' => [
                 SecretsManager::class => [
                     'example-secret',
@@ -72,7 +72,7 @@ Only secrets that are stored in key/value pairs are supported.
 <?php
 
 return [
-    'config' => [
+    'config_parameters' => [
         'providers' => [
             SecretsManager::class => [
                 'global-secrets',
@@ -97,7 +97,7 @@ Parameters will be loaded recursively by path. The key will be parameter name wi
 use Dvsa\LaminasConfigCloudParameters\Provider\ParameterStore;
 
 return [
-    'config' => [
+    'config_parameters' => [
         'providers' => [
             ParameterStore::class => [
                 '/global',
