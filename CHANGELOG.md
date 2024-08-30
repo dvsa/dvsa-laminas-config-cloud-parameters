@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/dvsa/dvsa-laminas-config-cloud-parameters/compare/v1.0.0...v2.0.0) (2024-08-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* drop PHP 8.0 & PHP 8.1 support ([#22](https://github.com/dvsa/dvsa-laminas-config-cloud-parameters/issues/22))
+
+### Features
+
+* drop PHP 8.0 & PHP 8.1 support ([#22](https://github.com/dvsa/dvsa-laminas-config-cloud-parameters/issues/22)) ([3f4e776](https://github.com/dvsa/dvsa-laminas-config-cloud-parameters/commit/3f4e7766f28917a67aa3f179434babcbc0ce09f8))
+
 ## [1.0.0](https://github.com/dvsa/dvsa-laminas-config-cloud-parameters/compare/v0.2.0...v1.0.0) (2024-03-19)
 
 
