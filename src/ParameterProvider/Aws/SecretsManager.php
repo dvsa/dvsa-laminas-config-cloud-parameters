@@ -22,6 +22,7 @@ class SecretsManager implements ParameterProviderInterface
     /**
      * @throws \JsonException
      */
+    #[\Override]
     public function __invoke(string $id): array
     {
         try {
@@ -41,6 +42,7 @@ class SecretsManager implements ParameterProviderInterface
         return json_decode($secret, true, 512, \JSON_THROW_ON_ERROR);
     }
 
+    #[\Override]
     public static function create(array $config): self
     {
         $clientConfig = ($config['aws']['secrets_manager'] ?? []) + ($config['aws']['global'] ?? []) + [

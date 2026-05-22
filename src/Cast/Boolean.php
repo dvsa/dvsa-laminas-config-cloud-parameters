@@ -4,6 +4,7 @@ namespace Dvsa\LaminasConfigCloudParameters\Cast;
 
 class Boolean implements CastInterface
 {
+    #[\Override]
     public function __invoke(string $value): bool
     {
         return filter_var($value, FILTER_VALIDATE_BOOLEAN);
