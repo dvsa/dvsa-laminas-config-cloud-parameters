@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DvsaTest\LaminasConfigCloudParameters\Functional;
 
 use Aws\MockHandler;
@@ -9,11 +11,11 @@ use Dvsa\LaminasConfigCloudParameters\Cast\Integer;
 use Dvsa\LaminasConfigCloudParameters\Exception\ParameterNotFoundException;
 use Dvsa\LaminasConfigCloudParameters\ParameterProvider\Aws\ParameterStore;
 use Dvsa\LaminasConfigCloudParameters\ParameterProvider\Aws\SecretsManager;
+use Laminas\ModuleManager\Listener\ConfigListener;
+use Laminas\ModuleManager\Listener\InitTrigger;
+use Laminas\ModuleManager\Listener\ModuleResolverListener;
 use Laminas\ModuleManager\ModuleEvent;
 use Laminas\ModuleManager\ModuleManager;
-use Laminas\Mvc\Application;
-use Laminas\Mvc\Service\ServiceManagerConfig;
-use Laminas\ServiceManager\ServiceManager;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -79,15 +81,7 @@ class ModuleTest extends TestCase
             ],
         ];
 
-        $application = $this->createApplication($config);
-
-        /**
-         * @var array<string, mixed> $config
-         */
-        $config = $application->getConfig();
-
-        /** @phpstan-ignore-next-line method.alreadyNarrowedType - Explicit runtime assertion for test clarity */
-        $this->assertIsArray($config);
+        $config = $this->loadMergedConfig($config);
 
         $this->assertSame('secret', $config['secret'] ?? null);
         $this->assertSame('parameter', $config['parameter'] ?? null);
@@ -122,36 +116,42 @@ class ModuleTest extends TestCase
             'parameter' => '%PARAMETER_VALUE_1%',
         ];
 
-        $application = $this->createApplication($config);
-
-        $application->getConfig();
+        $this->loadMergedConfig($config);
     }
 
     /**
+     * Exercises the module's config-merge hook by driving the ModuleManager and
+     * ConfigListener directly, without booting a full MVC Application. Returns
+     * the fully merged and processed config — equivalent to what an MVC
+     * application would expose via Application::getConfig().
+     *
      * @param array<string, mixed> $moduleConfig
+     *
+     * @return array<string, mixed>
      */
-    protected function createApplication(array $moduleConfig): Application
+    protected function loadMergedConfig(array $moduleConfig): array
     {
-        $configuration = [
-            'modules' => [
-                'Dvsa\LaminasConfigCloudParameters',
-            ],
-            'module_listener_options' => [],
-        ];
+        $moduleManager = new ModuleManager([
+            'Dvsa\LaminasConfigCloudParameters',
+        ]);
 
-        $smConfig = new ServiceManagerConfig([]);
-        $serviceManager = new ServiceManager();
-        $smConfig->configureServiceManager($serviceManager);
-        $serviceManager->setService('ApplicationConfig', $configuration);
+        $events = $moduleManager->getEventManager();
 
-        /**
-         * @var ModuleManager $moduleManager
-         */
-        $moduleManager = $serviceManager->get('ModuleManager');
+        // Minimal listener set: resolve the module name to its Module class,
+        // call Module::init() (which registers Module::onMergeConfig), and
+        // collect/merge module config.
+        $events->attach(ModuleEvent::EVENT_LOAD_MODULE_RESOLVE, new ModuleResolverListener());
+        $events->attach(ModuleEvent::EVENT_LOAD_MODULE, new InitTrigger());
 
-        $moduleManager->getEventManager()->attach(
+        $configListener = new ConfigListener();
+        $configListener->attach($events);
+
+        // Inject the test config before the module processes it. Attaching here,
+        // ahead of loadModules(), keeps this listener before Module::onMergeConfig,
+        // which is registered later during the module's init().
+        $events->attach(
             ModuleEvent::EVENT_MERGE_CONFIG,
-            function (ModuleEvent $e) use ($moduleConfig) {
+            function (ModuleEvent $e) use ($moduleConfig): void {
                 $configListener = $e->getConfigListener();
                 $config = $configListener->getMergedConfig(false);
 
@@ -163,6 +163,11 @@ class ModuleTest extends TestCase
 
         $moduleManager->loadModules();
 
-        return $serviceManager->get('Application');
+        /**
+         * @var array<string, mixed> $config
+         */
+        $config = $configListener->getMergedConfig(false);
+
+        return $config;
     }
 }

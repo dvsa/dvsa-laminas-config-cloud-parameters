@@ -3,3 +3,16 @@ parameters:
   paths:
     - src
     - test
+  ignoreErrors:
+    # symfony/dependency-injection 6+ annotates ParameterBag::resolveValue() with a
+    # generic `@template TValue of array<array|scalar>|scalar`. Our merged config is
+    # genuinely wider than that bound (it holds nested arrays, scalars AND objects
+    # such as cast instances and AWS client handlers), so PHPStan cannot resolve the
+    # template and reports argument.templateType. resolveValue() only substitutes
+    # string placeholders and passes every other value through untouched, so this is
+    # correct at runtime. symfony 5 declares no template, so the error is absent
+    # under --prefer-lowest; reportUnmatched keeps that matrix cell green.
+    -
+      identifier: argument.templateType
+      path: src/Module.php
+      reportUnmatched: false

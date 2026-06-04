@@ -50,7 +50,7 @@ class Module
         try {
             $bag->resolve();
             /** @var array<string, mixed> $resolved */
-            $resolved = $bag->resolveValue($config); // @phpstan-ignore argument.templateType
+            $resolved = $bag->resolveValue($config);
 
             if (!empty($config['config_parameters']['casts'])) {
                 $this->applyCasts($resolved, $config['config_parameters']['casts']);
