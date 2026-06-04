@@ -86,6 +86,7 @@ class ModuleTest extends TestCase
          */
         $config = $application->getConfig();
 
+        /** @phpstan-ignore-next-line method.alreadyNarrowedType - Explicit runtime assertion for test clarity */
         $this->assertIsArray($config);
 
         $this->assertSame('secret', $config['secret'] ?? null);

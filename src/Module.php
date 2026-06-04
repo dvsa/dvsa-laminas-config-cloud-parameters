@@ -50,7 +50,7 @@ class Module
         try {
             $bag->resolve();
             /** @var array<string, mixed> $resolved */
-            $resolved = $bag->resolveValue($config);
+            $resolved = $bag->resolveValue($config); // @phpstan-ignore argument.templateType
 
             if (!empty($config['config_parameters']['casts'])) {
                 $this->applyCasts($resolved, $config['config_parameters']['casts']);
@@ -88,6 +88,7 @@ class Module
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
 
         foreach ($casts as $key => $type) {
+            /** @phpstan-ignore-next-line function.alreadyNarrowedType */
             if (!is_a($type, Cast\CastInterface::class, allow_string: true)) {
                 throw new InvalidCastException("Class {$type} must implement " . Cast\CastInterface::class . " interface.");
             }
@@ -103,6 +104,7 @@ class Module
             $value = $propertyAccessor->getValue($config, $property);
 
             if (is_string($value)) {
+                // @phpstan-ignore-next-line parameterByRef.type
                 $propertyAccessor->setValue($config, $property, (new $type())($value));
             }
         }
