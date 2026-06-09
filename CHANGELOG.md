@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/dvsa/dvsa-laminas-config-cloud-parameters/compare/v2.0.0...v2.1.0) (2026-06-09)
+
+
+### Features
+
+* removed dependency on laminas-mvc and laminas-config, fix CI errors VOL-7346 BL-18892 VOL-6100 ([#27](https://github.com/dvsa/dvsa-laminas-config-cloud-parameters/issues/27)) ([50f856c](https://github.com/dvsa/dvsa-laminas-config-cloud-parameters/commit/50f856cb8f46748e37bee24d9c5377c53aeef4dd))
+
 ## [2.0.0](https://github.com/dvsa/dvsa-laminas-config-cloud-parameters/compare/v1.0.0...v2.0.0) (2024-08-30)
 
 
