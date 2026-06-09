@@ -19,6 +19,7 @@ class ParameterStore implements ParameterProviderInterface
         $this->ssmClient = $ssmClient;
     }
 
+    #[\Override]
     public function __invoke(string $id): array
     {
         try {
@@ -53,6 +54,7 @@ class ParameterStore implements ParameterProviderInterface
     /**
      * @param array<string, mixed> $config
      */
+    #[\Override]
     public static function create(array $config): self
     {
         $clientConfig = ($config['aws']['ssm_client'] ?? []) + ($config['aws']['global'] ?? []) + [

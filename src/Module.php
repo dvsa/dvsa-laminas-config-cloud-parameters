@@ -6,8 +6,6 @@ namespace Dvsa\LaminasConfigCloudParameters;
 
 use Dvsa\LaminasConfigCloudParameters\Exception\InvalidCastException;
 use Dvsa\LaminasConfigCloudParameters\ParameterProvider\ParameterProviderInterface;
-use Laminas\ConfigAggregator\ArrayProvider;
-use Laminas\ConfigAggregator\ConfigAggregator;
 use Laminas\ModuleManager\Listener\ConfigListener;
 use Laminas\ModuleManager\ModuleEvent;
 use Laminas\ModuleManager\ModuleManager;
@@ -49,28 +47,21 @@ class Module
 
         $bag = new ParameterBag($parameters);
 
-        $postProcessor = function (array $config) use ($bag): mixed {
-            try {
-                $bag->resolve();
+        try {
+            $bag->resolve();
+            /** @var array<string, mixed> $resolved */
+            $resolved = $bag->resolveValue($config);
 
-                /**
-                 * @var array<scalar, array<scalar, mixed>> $config
-                 */
-                $resolved = $bag->resolveValue($config);
-
-                if (!empty($config['config_parameters']['casts'])) {
-                    $this->applyCasts($resolved, $config['config_parameters']['casts']);
-                }
-
-                return $bag->unescapeValue($resolved);
-            } catch (SymfonyParameterNotFoundException $e) {
-                throw new Exception\ParameterNotFoundException($e->getMessage(), $e->getCode(), $e);
+            if (!empty($config['config_parameters']['casts'])) {
+                $this->applyCasts($resolved, $config['config_parameters']['casts']);
             }
-        };
 
-        $processedConfig = new ConfigAggregator([new ArrayProvider($config)], null, [$postProcessor]);
+            $processedConfig = $bag->unescapeValue($resolved);
+        } catch (SymfonyParameterNotFoundException $e) {
+            throw new Exception\ParameterNotFoundException($e->getMessage(), $e->getCode(), $e);
+        }
 
-        $configListener->setMergedConfig($processedConfig->getMergedConfig());
+        $configListener->setMergedConfig($processedConfig);
     }
 
     /**
@@ -97,6 +88,7 @@ class Module
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
 
         foreach ($casts as $key => $type) {
+            /** @phpstan-ignore-next-line function.alreadyNarrowedType */
             if (!is_a($type, Cast\CastInterface::class, allow_string: true)) {
                 throw new InvalidCastException("Class {$type} must implement " . Cast\CastInterface::class . " interface.");
             }
@@ -112,6 +104,7 @@ class Module
             $value = $propertyAccessor->getValue($config, $property);
 
             if (is_string($value)) {
+                // @phpstan-ignore-next-line parameterByRef.type
                 $propertyAccessor->setValue($config, $property, (new $type())($value));
             }
         }
