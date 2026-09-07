@@ -18,6 +18,11 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  */
 class Module
 {
+    /** Mirrors Symfony's own placeholder syntax: %name%, with %% an escaped percent sign. */
+    private const PARAMETER_PATTERN = '/%%|%([^%\s]++)%/';
+
+    private const MAX_REPORTED_PATHS = 10;
+
     public function init(ModuleManager $moduleManager): void
     {
         $events = $moduleManager->getEventManager();
@@ -58,7 +63,11 @@ class Module
 
             $processedConfig = $bag->unescapeValue($resolved);
         } catch (SymfonyParameterNotFoundException $e) {
-            throw new Exception\ParameterNotFoundException($e->getMessage(), $e->getCode(), $e);
+            throw new Exception\ParameterNotFoundException(
+                $this->describeUnresolvedParameters($config, $bag) ?? $e->getMessage(),
+                $e->getCode(),
+                $e
+            );
         }
 
         $configListener->setMergedConfig($processedConfig);
@@ -77,6 +86,77 @@ class Module
                 'casts' => [],
             ],
         ];
+    }
+
+
+    /**
+     * Symfony reports the name of the first parameter it could not resolve and nothing else,
+     * which leaves whoever hit it searching a merged config of thousands of keys to find out
+     * where the placeholder lives and therefore what to set. This walks the config to say
+     * where - every unresolved parameter and every key referencing it, not just the first.
+     *
+     * Only reached on the way to a fatal, so the cost is irrelevant, and it returns null if it
+     * finds nothing so the original message is never replaced with something less useful.
+     *
+     * @psalm-param array<string, mixed> $config
+     */
+    private function describeUnresolvedParameters(array $config, ParameterBag $bag): ?string
+    {
+        /** @var array<string, list<string>> $unresolved */
+        $unresolved = [];
+
+        $walk = function (array $node, string $path) use (&$walk, &$unresolved, $bag): void {
+            foreach ($node as $key => $value) {
+                $keyPath = $path === '' ? (string) $key : $path . '.' . $key;
+
+                if (is_array($value)) {
+                    $walk($value, $keyPath);
+                    continue;
+                }
+
+                if (!is_string($value) || !preg_match_all(self::PARAMETER_PATTERN, $value, $matches)) {
+                    continue;
+                }
+
+                foreach ($matches[1] as $name) {
+                    // An escaped %% produces an empty capture and references nothing.
+                    if ($name !== '' && !$bag->has($name) && !in_array($keyPath, $unresolved[$name] ?? [], true)) {
+                        $unresolved[$name][] = $keyPath;
+                    }
+                }
+            }
+        };
+
+        $walk($config, '');
+
+        if ($unresolved === []) {
+            return null;
+        }
+
+        ksort($unresolved);
+
+        $lines = [];
+        foreach ($unresolved as $name => $paths) {
+            $shown = array_slice($paths, 0, self::MAX_REPORTED_PATHS);
+            $suffix = count($paths) > self::MAX_REPORTED_PATHS
+                ? sprintf(' (and %d more)', count($paths) - self::MAX_REPORTED_PATHS)
+                : '';
+
+            $lines[] = sprintf('  "%s" referenced by %s%s', $name, implode(', ', $shown), $suffix);
+        }
+
+        $summary = count($unresolved) === 1
+            ? 'No provider supplied 1 config parameter:'
+            : sprintf('No provider supplied %d config parameters:', count($unresolved));
+
+        if ($config['config_parameters']['providers'] === []) {
+            $lines[] = '';
+            $lines[] = 'No parameter providers are configured, so no placeholder can resolve. Either'
+                . ' configure config_parameters.providers, or set these keys in your local config -'
+                . ' Laminas\\Stdlib\\ArrayUtils\\MergeRemoveKey removes one entirely.';
+        }
+
+        return $summary . "\n" . implode("\n", $lines);
     }
 
     /**
