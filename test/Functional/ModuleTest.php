@@ -11,6 +11,7 @@ use Dvsa\LaminasConfigCloudParameters\Cast\Integer;
 use Dvsa\LaminasConfigCloudParameters\Exception\ParameterNotFoundException;
 use Dvsa\LaminasConfigCloudParameters\ParameterProvider\Aws\ParameterStore;
 use Dvsa\LaminasConfigCloudParameters\ParameterProvider\Aws\SecretsManager;
+use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException as SymfonyParameterNotFoundException;
 use Laminas\ModuleManager\Listener\ConfigListener;
 use Laminas\ModuleManager\Listener\InitTrigger;
 use Laminas\ModuleManager\Listener\ModuleResolverListener;
@@ -117,6 +118,153 @@ class ModuleTest extends TestCase
         ];
 
         $this->loadMergedConfig($config);
+    }
+
+    /**
+     * Symfony names the first parameter it cannot resolve and stops there. What a developer
+     * needs is where the placeholder is, so they know which key to set or override.
+     */
+    public function testMissingParameterMessageNamesEveryConfigKeyReferencingIt(): void
+    {
+        $config = [
+            'config_parameters' => ['providers' => [], 'casts' => []],
+            'awsOptions' => ['region' => 'eu-west-1', 'proxy' => 'http://%shd_proxy%'],
+            'companies_house_connection' => ['proxy' => '%shd_proxy%'],
+        ];
+
+        try {
+            $this->loadMergedConfig($config);
+            $this->fail('Expected ' . ParameterNotFoundException::class);
+        } catch (ParameterNotFoundException $e) {
+            $this->assertStringContainsString(
+                '"shd_proxy" referenced by awsOptions.proxy, companies_house_connection.proxy',
+                $e->getMessage()
+            );
+        }
+    }
+
+    /** All of them, not just the one Symfony happened to reach first. */
+    public function testMissingParameterMessageReportsEveryUnresolvedParameter(): void
+    {
+        $config = [
+            'config_parameters' => ['providers' => [], 'casts' => []],
+            'mail' => ['dsn' => '%olcs_notify_dsn%'],
+            'awsOptions' => ['proxy' => 'http://%shd_proxy%'],
+        ];
+
+        try {
+            $this->loadMergedConfig($config);
+            $this->fail('Expected ' . ParameterNotFoundException::class);
+        } catch (ParameterNotFoundException $e) {
+            $this->assertStringContainsString('No provider supplied 2 config parameters:', $e->getMessage());
+            $this->assertStringContainsString('"olcs_notify_dsn" referenced by mail.dsn', $e->getMessage());
+            $this->assertStringContainsString('"shd_proxy" referenced by awsOptions.proxy', $e->getMessage());
+        }
+    }
+
+    /**
+     * The common local-development case: no providers, so nothing can resolve and the fix is
+     * to supply or remove the key rather than to hunt for a provider that is misbehaving.
+     */
+    public function testMissingParameterMessageExplainsWhenNoProvidersAreConfigured(): void
+    {
+        $config = [
+            'config_parameters' => ['providers' => [], 'casts' => []],
+            'awsOptions' => ['proxy' => 'http://%shd_proxy%'],
+        ];
+
+        try {
+            $this->loadMergedConfig($config);
+            $this->fail('Expected ' . ParameterNotFoundException::class);
+        } catch (ParameterNotFoundException $e) {
+            $this->assertStringContainsString('No parameter providers are configured', $e->getMessage());
+            $this->assertStringContainsString('MergeRemoveKey', $e->getMessage());
+        }
+    }
+
+    /** %% is an escaped percent sign, not a reference, and must not be reported as missing. */
+    public function testEscapedPercentIsNotReportedAsAMissingParameter(): void
+    {
+        $config = [
+            'config_parameters' => ['providers' => [], 'casts' => []],
+            'literal' => 'a 100%% certain literal',
+            'awsOptions' => ['proxy' => 'http://%shd_proxy%'],
+        ];
+
+        try {
+            $this->loadMergedConfig($config);
+            $this->fail('Expected ' . ParameterNotFoundException::class);
+        } catch (ParameterNotFoundException $e) {
+            $this->assertStringContainsString('No provider supplied 1 config parameter:', $e->getMessage());
+            $this->assertStringNotContainsString('literal', $e->getMessage());
+        }
+    }
+
+    /**
+     * The message is what every consumer logs, so it carries the full detail in prose. These
+     * fields are for consumers that can do more than print it - structured log fields, a
+     * health check, a setup script that offers to write the missing keys.
+     */
+    public function testExceptionCarriesTheUnresolvedParametersAsStructuredData(): void
+    {
+        $config = [
+            'config_parameters' => ['providers' => [], 'casts' => []],
+            'mail' => ['dsn' => '%olcs_notify_dsn%'],
+            'awsOptions' => ['proxy' => 'http://%shd_proxy%'],
+            'companies_house_connection' => ['proxy' => '%shd_proxy%'],
+        ];
+
+        try {
+            $this->loadMergedConfig($config);
+            $this->fail('Expected ' . ParameterNotFoundException::class);
+        } catch (ParameterNotFoundException $e) {
+            $this->assertSame(
+                [
+                    'olcs_notify_dsn' => ['mail.dsn'],
+                    'shd_proxy' => ['awsOptions.proxy', 'companies_house_connection.proxy'],
+                ],
+                $e->getUnresolvedParameters()
+            );
+            $this->assertSame(['olcs_notify_dsn', 'shd_proxy'], $e->getUnresolvedParameterNames());
+        }
+    }
+
+    /**
+     * The message caps the keys it lists so it stays readable; the structured data must not,
+     * or a consumer reading it would silently act on a partial list.
+     */
+    public function testStructuredDataIsCompleteEvenWhenTheMessageIsTruncated(): void
+    {
+        $referencingKeys = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $referencingKeys['service_' . $i] = ['endpoint' => 'https://%shd_proxy%/v1'];
+        }
+
+        $config = ['config_parameters' => ['providers' => [], 'casts' => []]] + $referencingKeys;
+
+        try {
+            $this->loadMergedConfig($config);
+            $this->fail('Expected ' . ParameterNotFoundException::class);
+        } catch (ParameterNotFoundException $e) {
+            $this->assertStringContainsString('(and 2 more)', $e->getMessage());
+            $this->assertCount(12, $e->getUnresolvedParameters()['shd_proxy']);
+        }
+    }
+
+    /** The underlying resolver failure stays reachable for anything that wants the original. */
+    public function testOriginalResolverExceptionIsPreserved(): void
+    {
+        $config = [
+            'config_parameters' => ['providers' => [], 'casts' => []],
+            'awsOptions' => ['proxy' => 'http://%shd_proxy%'],
+        ];
+
+        try {
+            $this->loadMergedConfig($config);
+            $this->fail('Expected ' . ParameterNotFoundException::class);
+        } catch (ParameterNotFoundException $e) {
+            $this->assertInstanceOf(SymfonyParameterNotFoundException::class, $e->getPrevious());
+        }
     }
 
     /**
