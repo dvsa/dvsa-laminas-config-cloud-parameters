@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/dvsa/dvsa-laminas-config-cloud-parameters/compare/v2.1.0...v2.2.0) (2026-09-08)
+
+
+### Features
+
+* improve locating missing parameters VOL-7553 ([#29](https://github.com/dvsa/dvsa-laminas-config-cloud-parameters/issues/29)) ([c314d35](https://github.com/dvsa/dvsa-laminas-config-cloud-parameters/commit/c314d3573b47ee7693977627e863f8f0a154fd1e))
+
 ## [2.1.0](https://github.com/dvsa/dvsa-laminas-config-cloud-parameters/compare/v2.0.0...v2.1.0) (2026-06-09)
 
 
